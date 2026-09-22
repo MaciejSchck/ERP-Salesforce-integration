@@ -31,7 +31,6 @@ public class OrderItemController {
         return orderItemRepository.findAll()
                 .stream()
                 .map(orderItem -> new OrderItemResponse(
-                        orderItem.getId(),
                         orderItem.getProduct().getItemName(),
                         orderItem.getQuantity(),
                         orderItem.getItemPrice()

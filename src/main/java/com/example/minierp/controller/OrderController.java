@@ -1,8 +1,6 @@
 package com.example.minierp.controller;
 
-import com.example.minierp.Customer;
-import com.example.minierp.Order;
-import com.example.minierp.Product;
+import com.example.minierp.*;
 import com.example.minierp.repository.CustomerRepository;
 import com.example.minierp.repository.OrderRepository;
 import jakarta.validation.Valid;
@@ -24,14 +22,59 @@ public class OrderController {
     }
 
     @GetMapping
-    public List<Order> getAllOrders() {
-        return orderRepository.findAll();
+    public List<OrderResponse> getAllOrders() {
+
+        return orderRepository.findAll()
+                .stream()
+                .map(order -> {
+
+                    List<OrderItemResponse> orderItems = order.getOrderItems()
+                            .stream()
+                            .map(orderItem -> new OrderItemResponse(
+                                    orderItem.getProduct().getItemName(),
+                                    orderItem.getQuantity(),
+                                    orderItem.getItemPrice()
+                            ))
+                            .toList();
+
+                    return new OrderResponse(
+                            order.getId(),
+                            order.getOrderDate(),
+                            order.getOrderStatus(),
+                            order.getCustomer().getName(),
+                            order.getCustomer().getAddress(),
+                            orderItems
+                    );
+                })
+                .toList();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Order> getOrderById(@PathVariable Long id) {
+    public ResponseEntity<OrderResponse> getOrderById(@PathVariable Long id) {
+
         return orderRepository.findById(id)
-                .map(order -> ResponseEntity.ok(order))
+                .map(order -> {
+
+                    List<OrderItemResponse> orderItems = order.getOrderItems()
+                            .stream()
+                            .map(orderItem -> new OrderItemResponse(
+                                    orderItem.getProduct().getItemName(),
+                                    orderItem.getQuantity(),
+                                    orderItem.getItemPrice()
+                            ))
+                            .toList();
+
+                    OrderResponse response = new OrderResponse(
+                            order.getId(),
+                            order.getOrderDate(),
+                            order.getOrderStatus(),
+                            order.getCustomer().getName(),
+                            order.getCustomer().getAddress(),
+                            orderItems
+                    );
+
+                    return ResponseEntity.ok(response);
+                })
                 .orElse(ResponseEntity.notFound().build());
     }
 
@@ -73,6 +116,14 @@ public class OrderController {
 
     @PostMapping
     public Order createOrder(@RequestBody Order order) {
+
+        Long customerId = order.getCustomer().getId();
+
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow();
+
+        order.setCustomer(customer);
+
         return orderRepository.save(order);
     }
 }

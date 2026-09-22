@@ -1,5 +1,7 @@
 package com.example.minierp;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -27,6 +29,7 @@ public class OrderItem {
     private BigDecimal itemPrice;
 
     @ManyToOne
+    @JsonIgnore
     private Order order;
 
     @ManyToOne

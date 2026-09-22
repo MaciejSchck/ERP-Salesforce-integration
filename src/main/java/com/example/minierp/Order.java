@@ -1,8 +1,10 @@
 package com.example.minierp;
 
 import jakarta.persistence.*;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "orders")
@@ -13,11 +15,13 @@ public class Order {
     private Long id;
 
     private LocalDate orderDate;
-
     private String orderStatus;
 
     @ManyToOne
     private Customer customer;
+
+    @OneToMany(mappedBy = "order")
+    private List<OrderItem> orderItems;
 
     public Order() {
     }
@@ -53,5 +57,9 @@ public class Order {
 
     public void setCustomer(Customer customer) {
         this.customer = customer;
+    }
+
+    public List<OrderItem> getOrderItems() {
+        return orderItems;
     }
 }

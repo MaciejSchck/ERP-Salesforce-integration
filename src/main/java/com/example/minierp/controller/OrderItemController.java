@@ -1,6 +1,7 @@
 package com.example.minierp.controller;
 
 import com.example.minierp.Order;
+import com.example.minierp.OrderItemResponse;
 import com.example.minierp.Product;
 import com.example.minierp.repository.ProductRepository;
 import com.example.minierp.repository.OrderRepository;
@@ -25,8 +26,17 @@ public class OrderItemController {
     }
 
     @GetMapping
-    public List<OrderItem> getAllOrderItems() {
-        return orderItemRepository.findAll();
+    public List<OrderItemResponse> getAllOrderItems() {
+
+        return orderItemRepository.findAll()
+                .stream()
+                .map(orderItem -> new OrderItemResponse(
+                        orderItem.getId(),
+                        orderItem.getProduct().getItemName(),
+                        orderItem.getQuantity(),
+                        orderItem.getItemPrice()
+                ))
+                .toList();
     }
 
     @PostMapping

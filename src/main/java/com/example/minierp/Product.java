@@ -5,33 +5,41 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
+
+import java.math.BigDecimal;
 
 @Entity
 public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long itemId;
+    private Long id;
 
     @NotBlank
     private String itemName;
-    @NotBlank
-    private String itemPrice;
+
+    @NotNull
+    @PositiveOrZero
+    private BigDecimal itemPrice;
+
     private String itemUnitOfMeasurement;
-    private String itemQuantity;
+    private Double itemStock;
 
     public Product() {
     }
 
-    public Product(String itemName, String itemPrice, String itemUnitOfMeasurement, String itemQuantity) {
+    public Product(String itemName, BigDecimal itemPrice, String itemUnitOfMeasurement, Double itemStock) {
         this.itemName = itemName;
         this.itemPrice = itemPrice;
         this.itemUnitOfMeasurement = itemUnitOfMeasurement;
-        this.itemQuantity = itemQuantity;
+        this.itemStock = itemStock;
     }
 
-    public Long getItemId() {
-        return itemId;
+    public Long getId() {
+        return id;
     }
 
     public String getItemName() {
@@ -42,11 +50,11 @@ public class Product {
         this.itemName = itemName;
     }
 
-    public String getItemPrice(){
+    public BigDecimal getItemPrice(){
         return itemPrice;
     }
 
-    public void setItemPrice(String itemPrice){
+    public void setItemPrice(BigDecimal itemPrice){
         this.itemPrice = itemPrice;
     }
 
@@ -58,11 +66,11 @@ public class Product {
         this.itemUnitOfMeasurement = itemUnitOfMeasurement;
     }
 
-    public String getItemQuantity() {
-        return itemQuantity;
+    public Double getItemStock() {
+        return itemStock;
     }
 
-    public void setItemQuantity(String itemQuantity) {
-        this.itemQuantity = itemQuantity;
+    public void setItemStock(Double itemStock) {
+        this.itemStock = itemStock;
     }
 }

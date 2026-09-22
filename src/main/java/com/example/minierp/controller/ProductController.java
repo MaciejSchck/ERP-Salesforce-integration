@@ -1,5 +1,7 @@
 package com.example.minierp.controller;
 
+import com.example.minierp.Order;
+import com.example.minierp.OrderItem;
 import com.example.minierp.Product;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -46,7 +48,7 @@ public class ProductController {
                     product.setItemName(updatedProduct.getItemName());
                     product.setItemPrice(updatedProduct.getItemPrice());
                     product.setItemUnitOfMeasurement(updatedProduct.getItemUnitOfMeasurement());
-                    product.setItemQuantity(updatedProduct.getItemQuantity());
+                    product.setItemStock(updatedProduct.getItemStock());
 
                     Product savedProduct = productRepository.save(product);
 
@@ -68,7 +70,7 @@ public class ProductController {
     }
 
     @PostMapping
-    public Product createProduct(@Valid @RequestBody Product product) {
+    public Product createProduct(@RequestBody Product product) {
         return productRepository.save(product);
     }
 }

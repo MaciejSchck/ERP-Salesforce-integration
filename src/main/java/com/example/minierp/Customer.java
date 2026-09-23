@@ -17,6 +17,7 @@ public class Customer {
 
     @NotBlank
     private String name;
+    @NotBlank
     private String taxIdNo;
     @Email
     private String email;
@@ -51,7 +52,7 @@ public class Customer {
         return taxIdNo;
     }
 
-    public void setTaxIdNo(){
+    public void setTaxIdNo(String taxIdNo){
         this.taxIdNo = taxIdNo;
     }
 

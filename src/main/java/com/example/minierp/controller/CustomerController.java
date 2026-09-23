@@ -44,6 +44,7 @@ public class CustomerController {
                 .map(customer -> {
 
                     customer.setName(updatedCustomer.getName());
+                    customer.setTaxIdNo(updatedCustomer.getTaxIdNo());
                     customer.setEmail(updatedCustomer.getEmail());
                     customer.setPhone(updatedCustomer.getPhone());
                     customer.setAddress(updatedCustomer.getAddress());

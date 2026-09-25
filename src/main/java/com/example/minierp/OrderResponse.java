@@ -10,6 +10,7 @@ public class OrderResponse {
     private String orderStatus;
     private String customerName;
     private String customerAddress;
+    private String customerTaxIdNo;
     private List<OrderItemResponse> orderItems;
 
     public OrderResponse(
@@ -18,6 +19,7 @@ public class OrderResponse {
             String orderStatus,
             String customerName,
             String customerAddress,
+            String customerTaxIdNo,
             List<OrderItemResponse> orderItems) {
 
         this.id = id;
@@ -25,6 +27,7 @@ public class OrderResponse {
         this.orderStatus = orderStatus;
         this.customerName = customerName;
         this.customerAddress = customerAddress;
+        this.customerTaxIdNo = customerTaxIdNo;
         this.orderItems = orderItems;
     }
 
@@ -47,6 +50,8 @@ public class OrderResponse {
     public String getCustomerAddress() {
         return customerAddress;
     }
+
+    public String getCustomerTaxIdNo() { return customerTaxIdNo; }
 
     public List<OrderItemResponse> getOrderItems() {
         return orderItems;

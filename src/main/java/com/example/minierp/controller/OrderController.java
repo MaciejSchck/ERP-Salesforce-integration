@@ -43,6 +43,7 @@ public class OrderController {
                             order.getOrderStatus(),
                             order.getCustomer().getName(),
                             order.getCustomer().getAddress(),
+                            order.getCustomer().getTaxIdNo(),
                             orderItems
                     );
                 })
@@ -70,6 +71,7 @@ public class OrderController {
                             order.getOrderStatus(),
                             order.getCustomer().getName(),
                             order.getCustomer().getAddress(),
+                            order.getCustomer().getTaxIdNo(),
                             orderItems
                     );
 
@@ -115,7 +117,7 @@ public class OrderController {
     }
 
     @PostMapping
-    public Order createOrder(@RequestBody Order order) {
+    public OrderResponse createOrder(@RequestBody Order order) {
 
         Long customerId = order.getCustomer().getId();
 
@@ -124,6 +126,27 @@ public class OrderController {
 
         order.setCustomer(customer);
 
-        return orderRepository.save(order);
+        orderRepository.save(order);
+
+        List<OrderItemResponse> orderItems = order.getOrderItems() == null
+                ? List.of()
+                : order.getOrderItems()
+                .stream()
+                .map(orderItem -> new OrderItemResponse(
+                        orderItem.getProduct().getItemName(),
+                        orderItem.getQuantity(),
+                        orderItem.getItemPrice()
+                ))
+                .toList();
+
+        return new OrderResponse(
+                order.getId(),
+                order.getOrderDate(),
+                order.getOrderStatus(),
+                order.getCustomer().getName(),
+                order.getCustomer().getAddress(),
+                order.getCustomer().getTaxIdNo(),
+                orderItems
+        );
     }
 }

@@ -1,5 +1,6 @@
 package com.example.minierp;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -12,6 +13,7 @@ public class OrderResponse {
     private String customerAddress;
     private String customerTaxIdNo;
     private List<OrderItemResponse> orderItems;
+    private BigDecimal total;
 
     public OrderResponse(
             Long id,
@@ -20,7 +22,8 @@ public class OrderResponse {
             String customerName,
             String customerAddress,
             String customerTaxIdNo,
-            List<OrderItemResponse> orderItems) {
+            List<OrderItemResponse> orderItems,
+            BigDecimal total) {
 
         this.id = id;
         this.orderDate = orderDate;
@@ -29,6 +32,7 @@ public class OrderResponse {
         this.customerAddress = customerAddress;
         this.customerTaxIdNo = customerTaxIdNo;
         this.orderItems = orderItems;
+        this.total = total;
     }
 
     public Long getId() {
@@ -56,4 +60,8 @@ public class OrderResponse {
     public List<OrderItemResponse> getOrderItems() {
         return orderItems;
     }
+
+    public BigDecimal getTotal() { return total; }
+
+    public void setTotal(BigDecimal total) { this.total = total; }
 }

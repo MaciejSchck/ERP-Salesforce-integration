@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -37,6 +38,11 @@ public class OrderController {
                             ))
                             .toList();
 
+                    BigDecimal total = order.getOrderItems().stream()
+                            .map(item -> item.getItemPrice()
+                                    .multiply(BigDecimal.valueOf(item.getQuantity())))
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
                     return new OrderResponse(
                             order.getId(),
                             order.getOrderDate(),
@@ -44,7 +50,8 @@ public class OrderController {
                             order.getCustomer().getName(),
                             order.getCustomer().getAddress(),
                             order.getCustomer().getTaxIdNo(),
-                            orderItems
+                            orderItems,
+                            total
                     );
                 })
                 .toList();
@@ -65,6 +72,11 @@ public class OrderController {
                             ))
                             .toList();
 
+                    BigDecimal total = order.getOrderItems().stream()
+                            .map(item -> item.getItemPrice()
+                                    .multiply(BigDecimal.valueOf(item.getQuantity())))
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
                     OrderResponse response = new OrderResponse(
                             order.getId(),
                             order.getOrderDate(),
@@ -72,7 +84,8 @@ public class OrderController {
                             order.getCustomer().getName(),
                             order.getCustomer().getAddress(),
                             order.getCustomer().getTaxIdNo(),
-                            orderItems
+                            orderItems,
+                            total
                     );
 
                     return ResponseEntity.ok(response);
@@ -139,6 +152,11 @@ public class OrderController {
                 ))
                 .toList();
 
+        BigDecimal total = order.getOrderItems().stream()
+                .map(item -> item.getItemPrice()
+                        .multiply(BigDecimal.valueOf(item.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
         return new OrderResponse(
                 order.getId(),
                 order.getOrderDate(),
@@ -146,7 +164,8 @@ public class OrderController {
                 order.getCustomer().getName(),
                 order.getCustomer().getAddress(),
                 order.getCustomer().getTaxIdNo(),
-                orderItems
+                orderItems,
+                total
         );
     }
 }

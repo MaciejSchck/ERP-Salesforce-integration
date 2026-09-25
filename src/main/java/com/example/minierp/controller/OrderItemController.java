@@ -1,11 +1,8 @@
 package com.example.minierp.controller;
 
-import com.example.minierp.Order;
-import com.example.minierp.OrderItemResponse;
-import com.example.minierp.Product;
+import com.example.minierp.*;
 import com.example.minierp.repository.ProductRepository;
 import com.example.minierp.repository.OrderRepository;
-import com.example.minierp.OrderItem;
 import com.example.minierp.repository.OrderItemRepository;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,17 +36,17 @@ public class OrderItemController {
     }
 
     @PostMapping
-    public OrderItem createOrderItem(@RequestBody OrderItem orderItem) {
+    public OrderItem createOrderItem(@RequestBody OrderItemRequest request) {
 
-        Long orderId = orderItem.getOrder().getId();
-        Long productId = orderItem.getProduct().getId();
-
-        Order order = orderRepository.findById(orderId)
+        Order order = orderRepository.findById(request.getOrder().getId())
                 .orElseThrow();
 
-        Product product = productRepository.findById(productId)
+        Product product = productRepository.findById(request.getProduct().getId())
                 .orElseThrow();
 
+        OrderItem orderItem = new OrderItem();
+
+        orderItem.setQuantity(request.getQuantity());
         orderItem.setOrder(order);
         orderItem.setProduct(product);
         orderItem.setItemPrice(product.getItemPrice());

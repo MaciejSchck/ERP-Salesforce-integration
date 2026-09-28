@@ -40,15 +40,28 @@ public class ProductController {
     @PutMapping("/{id}")
     public ResponseEntity<Product> updateProduct(
             @PathVariable Long id,
-            @Valid @RequestBody Product updatedProduct) {
+            @RequestBody Product updatedProduct) {
 
         return productRepository.findById(id)
                 .map(product -> {
 
-                    product.setItemName(updatedProduct.getItemName());
-                    product.setItemPrice(updatedProduct.getItemPrice());
-                    product.setItemUnitOfMeasurement(updatedProduct.getItemUnitOfMeasurement());
-                    product.setItemStock(updatedProduct.getItemStock());
+                    if (updatedProduct.getItemName() != null) {
+                        product.setItemName(updatedProduct.getItemName());
+                    }
+
+                    if (updatedProduct.getItemPrice() != null) {
+                        product.setItemPrice(updatedProduct.getItemPrice());
+                    }
+
+                    if (updatedProduct.getItemUnitOfMeasurement() != null) {
+                        product.setItemUnitOfMeasurement(
+                                updatedProduct.getItemUnitOfMeasurement()
+                        );
+                    }
+
+                    if (updatedProduct.getItemStock() != null) {
+                        product.setItemStock(updatedProduct.getItemStock());
+                    }
 
                     Product savedProduct = productRepository.save(product);
 

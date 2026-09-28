@@ -4,6 +4,7 @@ import com.example.minierp.*;
 import com.example.minierp.repository.ProductRepository;
 import com.example.minierp.repository.OrderRepository;
 import com.example.minierp.repository.OrderItemRepository;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,6 +29,7 @@ public class OrderItemController {
         return orderItemRepository.findAll()
                 .stream()
                 .map(orderItem -> new OrderItemResponse(
+                        orderItem.getId(),
                         orderItem.getProduct().getItemName(),
                         orderItem.getQuantity(),
                         orderItem.getItemPrice()
@@ -36,7 +38,7 @@ public class OrderItemController {
     }
 
     @PostMapping
-    public OrderItem createOrderItem(@RequestBody OrderItemRequest request) {
+    public OrderItemResponse createOrderItem(@RequestBody OrderItemRequest request) {
 
         Order order = orderRepository.findById(request.getOrder().getId())
                 .orElseThrow();
@@ -51,6 +53,38 @@ public class OrderItemController {
         orderItem.setProduct(product);
         orderItem.setItemPrice(product.getItemPrice());
 
+        OrderItem savedOrderItem = orderItemRepository.save(orderItem);
+
+        return new OrderItemResponse(
+                savedOrderItem.getId(),
+                savedOrderItem.getProduct().getItemName(),
+                savedOrderItem.getQuantity(),
+                savedOrderItem.getItemPrice()
+        );
+    }
+
+    @PutMapping("/{id}")
+    public OrderItem updateOrderItem(
+            @PathVariable Long id,
+            @RequestBody OrderItemRequest request) {
+
+        OrderItem orderItem = orderItemRepository.findById(id)
+                .orElseThrow();
+
+        orderItem.setQuantity(request.getQuantity());
+
         return orderItemRepository.save(orderItem);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteOrderItem(@PathVariable Long id) {
+
+        if (!orderItemRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        orderItemRepository.deleteById(id);
+
+        return ResponseEntity.noContent().build();
     }
 }

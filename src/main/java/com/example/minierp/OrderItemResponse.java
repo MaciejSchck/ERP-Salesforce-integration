@@ -4,16 +4,25 @@ import java.math.BigDecimal;
 
 public class OrderItemResponse {
 
+    private Long id;
     private String productName;
     private Integer quantity;
     private BigDecimal itemPrice;
 
-    public OrderItemResponse(String productName, Integer quantity, BigDecimal itemPrice) {
+    public OrderItemResponse(Long id, String productName, Integer quantity, BigDecimal itemPrice) {
+        this.id = id;
         this.productName = productName;
         this.quantity = quantity;
         this.itemPrice = itemPrice;
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getProductName() {
         return productName;

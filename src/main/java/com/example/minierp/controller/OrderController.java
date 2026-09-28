@@ -2,7 +2,9 @@ package com.example.minierp.controller;
 
 import com.example.minierp.*;
 import com.example.minierp.repository.CustomerRepository;
+import com.example.minierp.repository.OrderItemRepository;
 import com.example.minierp.repository.OrderRepository;
+import com.example.minierp.repository.ProductRepository;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,10 +18,14 @@ public class OrderController {
 
     private final OrderRepository orderRepository;
     private final CustomerRepository customerRepository;
+    private final OrderItemRepository orderItemRepository;
+    private final ProductRepository productRepository;
 
-    public OrderController(OrderRepository orderRepository, CustomerRepository customerRepository) {
+    public OrderController(OrderRepository orderRepository, CustomerRepository customerRepository, OrderItemRepository orderItemRepository, ProductRepository productRepository) {
         this.orderRepository = orderRepository;
         this.customerRepository = customerRepository;
+        this.orderItemRepository = orderItemRepository;
+        this.productRepository = productRepository;
     }
 
     @GetMapping
@@ -32,6 +38,7 @@ public class OrderController {
                     List<OrderItemResponse> orderItems = order.getOrderItems()
                             .stream()
                             .map(orderItem -> new OrderItemResponse(
+                                    orderItem.getId(),
                                     orderItem.getProduct().getItemName(),
                                     orderItem.getQuantity(),
                                     orderItem.getItemPrice()
@@ -66,6 +73,7 @@ public class OrderController {
                     List<OrderItemResponse> orderItems = order.getOrderItems()
                             .stream()
                             .map(orderItem -> new OrderItemResponse(
+                                    orderItem.getId(),
                                     orderItem.getProduct().getItemName(),
                                     orderItem.getQuantity(),
                                     orderItem.getItemPrice()
@@ -130,40 +138,60 @@ public class OrderController {
     }
 
     @PostMapping
-    public OrderResponse createOrder(@RequestBody Order order) {
+    public OrderResponse createOrder(@RequestBody CreateOrderRequest request) {
 
-        Long customerId = order.getCustomer().getId();
+        Long customerId = request.getCustomer().getId();
 
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow();
 
+        Order order = new Order();
+
+        order.setOrderDate(request.getOrderDate());
+        order.setOrderStatus(request.getOrderStatus());
         order.setCustomer(customer);
 
-        orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
 
-        List<OrderItemResponse> orderItems = order.getOrderItems() == null
-                ? List.of()
-                : order.getOrderItems()
+        List<OrderItemResponse> orderItems = request.getOrderItems()
                 .stream()
-                .map(orderItem -> new OrderItemResponse(
-                        orderItem.getProduct().getItemName(),
-                        orderItem.getQuantity(),
-                        orderItem.getItemPrice()
-                ))
+                .map(itemRequest -> {
+
+                    Long productId = itemRequest.getProduct().getId();
+
+                    Product product = productRepository.findById(productId)
+                            .orElseThrow();
+
+                    OrderItem orderItem = new OrderItem();
+
+                    orderItem.setQuantity(itemRequest.getQuantity());
+                    orderItem.setOrder(savedOrder);
+                    orderItem.setProduct(product);
+                    orderItem.setItemPrice(product.getItemPrice());
+
+                    OrderItem savedOrderItem = orderItemRepository.save(orderItem);
+
+                    return new OrderItemResponse(
+                            savedOrderItem.getId(),
+                            savedOrderItem.getProduct().getItemName(),
+                            savedOrderItem.getQuantity(),
+                            savedOrderItem.getItemPrice()
+                    );
+                })
                 .toList();
 
-        BigDecimal total = order.getOrderItems().stream()
+        BigDecimal total = orderItems.stream()
                 .map(item -> item.getItemPrice()
                         .multiply(BigDecimal.valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         return new OrderResponse(
-                order.getId(),
-                order.getOrderDate(),
-                order.getOrderStatus(),
-                order.getCustomer().getName(),
-                order.getCustomer().getAddress(),
-                order.getCustomer().getTaxIdNo(),
+                savedOrder.getId(),
+                savedOrder.getOrderDate(),
+                savedOrder.getOrderStatus(),
+                savedOrder.getCustomer().getName(),
+                savedOrder.getCustomer().getAddress(),
+                savedOrder.getCustomer().getTaxIdNo(),
                 orderItems,
                 total
         );

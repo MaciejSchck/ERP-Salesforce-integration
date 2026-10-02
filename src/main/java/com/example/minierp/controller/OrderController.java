@@ -6,8 +6,11 @@ import com.example.minierp.repository.OrderItemRepository;
 import com.example.minierp.repository.OrderRepository;
 import com.example.minierp.repository.ProductRepository;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -137,13 +140,34 @@ public class OrderController {
         return ResponseEntity.noContent().build();
     }
 
+    @Transactional
     @PostMapping
     public OrderResponse createOrder(@RequestBody CreateOrderRequest request) {
 
         Long customerId = request.getCustomer().getId();
 
         Customer customer = customerRepository.findById(customerId)
-                .orElseThrow();
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Customer not found"
+                        )
+                );
+
+        List<OrderItemRequest> itemRequests = request.getOrderItems() == null
+                ? List.of()
+                : request.getOrderItems();
+
+        List<Product> products = itemRequests.stream()
+                .map(itemRequest -> productRepository.findById(
+                        itemRequest.getProduct().getId()
+                ).orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Product not found"
+                        )
+                ))
+                .toList();
 
         Order order = new Order();
 
@@ -153,32 +177,29 @@ public class OrderController {
 
         Order savedOrder = orderRepository.save(order);
 
-        List<OrderItemResponse> orderItems = request.getOrderItems()
-                .stream()
-                .map(itemRequest -> {
+        List<OrderItemResponse> orderItems = new java.util.ArrayList<>();
 
-                    Long productId = itemRequest.getProduct().getId();
+        for (int i = 0; i < itemRequests.size(); i++) {
 
-                    Product product = productRepository.findById(productId)
-                            .orElseThrow();
+            OrderItemRequest itemRequest = itemRequests.get(i);
+            Product product = products.get(i);
 
-                    OrderItem orderItem = new OrderItem();
+            OrderItem orderItem = new OrderItem();
 
-                    orderItem.setQuantity(itemRequest.getQuantity());
-                    orderItem.setOrder(savedOrder);
-                    orderItem.setProduct(product);
-                    orderItem.setItemPrice(product.getItemPrice());
+            orderItem.setQuantity(itemRequest.getQuantity());
+            orderItem.setOrder(savedOrder);
+            orderItem.setProduct(product);
+            orderItem.setItemPrice(product.getItemPrice());
 
-                    OrderItem savedOrderItem = orderItemRepository.save(orderItem);
+            OrderItem savedOrderItem = orderItemRepository.save(orderItem);
 
-                    return new OrderItemResponse(
-                            savedOrderItem.getId(),
-                            savedOrderItem.getProduct().getItemName(),
-                            savedOrderItem.getQuantity(),
-                            savedOrderItem.getItemPrice()
-                    );
-                })
-                .toList();
+            orderItems.add(new OrderItemResponse(
+                    savedOrderItem.getId(),
+                    savedOrderItem.getProduct().getItemName(),
+                    savedOrderItem.getQuantity(),
+                    savedOrderItem.getItemPrice()
+            ));
+        }
 
         BigDecimal total = orderItems.stream()
                 .map(item -> item.getItemPrice()

@@ -30,9 +30,11 @@ public class OrderItemController {
                 .stream()
                 .map(orderItem -> new OrderItemResponse(
                         orderItem.getId(),
+                        orderItem.getProduct().getId(),
                         orderItem.getProduct().getItemName(),
                         orderItem.getQuantity(),
-                        orderItem.getItemPrice()
+                        orderItem.getItemPrice(),
+                        orderItem.getProduct().getItemUnitOfMeasurement()
                 ))
                 .toList();
     }
@@ -57,9 +59,11 @@ public class OrderItemController {
 
         return new OrderItemResponse(
                 savedOrderItem.getId(),
+                orderItem.getProduct().getId(),
                 savedOrderItem.getProduct().getItemName(),
                 savedOrderItem.getQuantity(),
-                savedOrderItem.getItemPrice()
+                savedOrderItem.getItemPrice(),
+                savedOrderItem.getProduct().getItemUnitOfMeasurement()
         );
     }
 
